@@ -15,7 +15,7 @@ module.exports = class MyPlugin {
 
   start() {
     // Do stuff when enabled
-    if (window._obs) _obs.disconnect();
+    if (this._observer) _obs.disconnect();
 
 const currentUserId = BdApi.Webpack.getModule(m => m?._dispatchToken && m.getCurrentUser).getCurrentUser().id;
 
@@ -50,7 +50,7 @@ const getReactProps = (element, filter) => {
         }
     };
 
-    const obs = window._obs = new MutationObserver(changes => {
+    const obs = this._observer = new MutationObserver(changes => {
         for (const mutation of changes) {
             if (mutation.type === "attributes" && mutation.attributeName === "class") {
                const name = Object.keys(Injections).find(k => mutation.target.classList?.contains(k));
@@ -88,5 +88,6 @@ const getReactProps = (element, filter) => {
 
   stop() {
     // Cleanup when disabled
+    this._observer.disconnect()
   }
 };
