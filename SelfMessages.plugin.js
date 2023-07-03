@@ -15,7 +15,7 @@ module.exports = class MyPlugin {
 
   start() {
     // Do stuff when enabled
-    if (this._observer) _obs.disconnect();
+    if (this._observer) this._observer.disconnect();
 
 const currentUserId = BdApi.Webpack.getModule(m => m?._dispatchToken && m.getCurrentUser).getCurrentUser().id;
 
