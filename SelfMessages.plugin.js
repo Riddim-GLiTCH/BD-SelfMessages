@@ -9,27 +9,14 @@
  */
 class SelfMessages {
   start() {
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === "attributes" && mutation.attributeName === "class") {
-          const className = Object.keys(this.injections).find((key) => mutation.target.classList?.contains(key));
-          if (className) this.injections[className]([mutation.target]);
-        }
-
-        if (mutation.addedNodes.length) this.handleAddedNodes(mutation.addedNodes);
-      }
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-
-    const currentUserId = this.getCurrentUser()?.id;
-    if (!currentUserId) return;
+    const currentUserId = () => {return this.getCurrentUser()?.id};
+    if (!currentUserId()) return;
 
     const messageElements = Array.from(document.querySelectorAll(".message-2CShn3"));
     for (const el of messageElements) {
       if (!el.classList.contains("selfmessage")) {
         const props = this.getReactProps(el, (e) => e.message);
-        if (props?.message?.author?.id === currentUserId) el.classList.add("selfmessage");
+        if (props?.message?.author?.id === currentUserId()) el.classList.add("selfmessage");
       }
     }
 
@@ -37,18 +24,37 @@ class SelfMessages {
   }
 
   stop() {
-    this.disconnectObserver();
+    const messageElements = document.querySelectorAll(".selfmessage");
+    
+    for (const el of messageElements) {
+      if (el.classList.contains("selfmessage")) {
+        el.classList.remove("selfmessage");
+      }
+    }
+    
+    console.log("SelfMessages Stopped");
   }
+  
 
-  handleAddedNodes(addedNodes) {
-    for (const node of addedNodes) {
-      if (node.nodeType === Node.TEXT_NODE) continue;
-      for (const className in this.injections) {
-        const elements = node.querySelectorAll(`.${className}`);
-        if (elements.length) this.injections[className](elements);
+  observer({addedNodes}) {
+    for (const added of addedNodes) {
+      if (added.nodeType === Node.TEXT_NODE) continue;
+      
+      const messageElements = Array.from(added.querySelectorAll(".message-2CShn3"));
+      const currentUserId = () => {return this.getCurrentUser()?.id};
+      if (!currentUserId()) return;
+      
+      for (const el of messageElements) {
+        if (!el.classList.contains("selfmessage")) {
+          const props = this.getReactProps(el, (e) => e.message);
+          if (props?.message?.author?.id === currentUserId) {
+            el.classList.add("selfmessage");
+          }
+        }
       }
     }
   }
+  
 
   getReactProps(element, filter) {
     const reactPropsKey = Object.keys(element).find((key) => key.startsWith("__reactProps"));
@@ -74,26 +80,6 @@ class SelfMessages {
     const module = BdApi.Webpack.getModule((m) => m?._dispatchToken && m.getCurrentUser);
     return module?.getCurrentUser?.();
   }
-
-  disconnectObserver() {
-    if (this.observer) {
-      this.observer.disconnect();
-      this.observer = null;
-    }
-  }
-
-  injections = {
-    "message-2CShn3": (elements) => {
-      for (const el of elements) {
-        if (!el.classList?.contains("selfmessage")) {
-          const props = this.getReactProps(el, (e) => e.message);
-          if (props?.message?.author?.id === this.getCurrentUser()?.id) {
-            el.classList.add("selfmessage");
-          }
-        }
-      }
-    },
-  };
 }
 
 module.exports = SelfMessages;
