@@ -2,7 +2,7 @@
  * @name SelfMessages
  * @author Riddim_GLiTCH
  * @authorId 801089753038061669
- * @version 1.2
+ * @version 1.4
  * @description BD theme helper plugin, Marks messages sent by the currently logged in user with an element for use with themes.
  * @invite aYxpgkvdvR
  * @source https://github.com/Riddim-GLiTCH/BD-SelfMessages
